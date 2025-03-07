@@ -1,13 +1,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../helpers/db';
 import { Employee } from './employee.entity';
-import { Department } from './employee.entity';
+import { Department } from './department.entity';
 
 export class Employees {
     private employeeRepository: Repository<Employee> = AppDataSource.getRepository(Employee);
 
     async getAll() {
-        return this.employeeRepository.find({ select: ['id', 'name', 'position', 'address', 'salary', 'department', 'isActive', 'hireDate'] });
+        return this.employeeRepository.find({
+            relations: ['department'],
+            select: ['id', 'name', 'position', 'salary', 'isActive', 'hireDate']
+        });
     }  
     async getById(id: number) {
         return this.employeeRepository.findOneBy({ id });
@@ -48,26 +51,22 @@ export class Departments {
     }
  
     async create(data: Partial<Department>) {
-        if (await this.departmentRepository.findOneBy({ position: data.employees })) {
-            throw new Error(`Employees ${data.employees} are already registered`);
-        }
-
-        const employee = this.departmentRepository.create(data);
-        return this.departmentRepository.save(employee);
+        const department = this.departmentRepository.create(data);
+        return this.departmentRepository.save(department);
     }
 
-    async update(id: number, data: Partial<Employee>) {
-        const employee = await this.getById(id);
-        if (!employee) throw new Error('employee cant be found');
+    async update(id: number, data: Partial<Department>) {
+        const department = await this.getById(id);
+        if (!department) throw new Error('department cant be found');
 
-        Object.assign(employee, data);
-        return this.departmentRepository.save(employee);
+        Object.assign(department, data);
+        return this.departmentRepository.save(department);
     }
 
     async delete(id: number) {
-        const employee = await this.getById(id);
-        if (!employee) throw new Error('employee cant be found');
+        const department = await this.getById(id);
+        if (!department) throw new Error('department cant be found');
 
-        return this.departmentRepository.remove(employee);
+        return this.departmentRepository.remove(department);
     }
 }
