@@ -1,14 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import { initializeDatabase } from './helpers/db';
-import userRouter from './employee/employee.controller';
 import employeeRouter from './employee/employee.controller';
 import { errorHandler } from './middleware/error.handler';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use('/users', userRouter);
+app.use('/employee', employeeRouter);
 app.use(employeeRouter);
 app.use(errorHandler);
 
