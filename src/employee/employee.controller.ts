@@ -1,9 +1,8 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import multer from "multer";
 import csvParser from "csv-parser";
 import { AppDataSource } from "../helpers/db";
 import { Employee } from "./employee.entity";
-import { Department } from "./department.entity";
 import { Employees, Departments } from "./employee.service";
 import fs from "fs";
 
@@ -12,8 +11,8 @@ const upload = multer({ dest: "uploads/" });
 const employeeService = new Employees();
 const departmentService = new Departments();
 
-// Get all employees
-router.get("/employees", async (req: Request, res: Response, next: NextFunction) => {
+// Employee routes
+router.get("/employees", async (req, res, next) => {
     try {
         const employees = await employeeService.getAll();
         res.json(employees);
@@ -22,8 +21,7 @@ router.get("/employees", async (req: Request, res: Response, next: NextFunction)
     }
 });
 
-// Get employee by ID
-router.get("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/employees/:id", async (req, res, next) => {
     try {
         const employee = await employeeService.getById(Number(req.params.id));
         if (!employee) {
@@ -35,8 +33,7 @@ router.get("/employees/:id", async (req: Request, res: Response, next: NextFunct
     }
 });
 
-// Create employee
-router.post("/employees", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/employees", async (req, res, next) => {
     try {
         const employee = await employeeService.create(req.body);
         res.status(201).json(employee);
@@ -45,85 +42,7 @@ router.post("/employees", async (req: Request, res: Response, next: NextFunction
     }
 });
 
-// Update employee
-router.put("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const employee = await employeeService.update(Number(req.params.id), req.body);
-        res.json(employee);
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Delete employee
-router.delete("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        await employeeService.delete(Number(req.params.id));
-        res.status(204).send();
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Bulk import employees
-router.post("/employees/bulk", upload.single("file"), async (req, res, next) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
-
-        const employees: Employee[] = [];
-        const filePath = req.file.path;
-
-        const stream = fs.createReadStream(filePath)
-            .pipe(csvParser())
-            .on("data", async (row) => {
-                try {
-                    const { name, position, departmentId, hireDate } = row;
-
-                    const department = await departmentService.getById(Number(departmentId));
-                    if (!department) {
-                        console.log(`Department ID ${departmentId} not found. Skipping record.`);
-                        return;
-                    }
-
-                    const employee = new Employee();
-                    employee.name = name;
-                    employee.position = position;
-                    employee.department = department;
-                    employee.hireDate = new Date(hireDate);
-                    employees.push(employee);
-                } catch (error) {
-                    console.error('Error processing row:', error);
-                }
-            });
-
-        // Use promises to handle stream events
-        await new Promise((resolve, reject) => {
-            stream.on("end", resolve);
-            stream.on("error", reject);
-        });
-
-        // Save all employees after stream is complete
-        await AppDataSource.getRepository(Employee).save(employees);
-        
-        // Clean up uploaded file
-        fs.unlinkSync(filePath);
-        
-        res.json({ 
-            message: "Bulk import completed", 
-            count: employees.length 
-        });
-    } catch (error) {
-        // Clean up file if exists
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
-        next(error);
-    }
-});
-
-// Get all departments
+// Department routes
 router.get("/departments", async (req, res, next) => {
     try {
         const departments = await departmentService.getAll();
@@ -133,7 +52,6 @@ router.get("/departments", async (req, res, next) => {
     }
 });
 
-// Get department by ID
 router.get("/departments/:id", async (req, res, next) => {
     try {
         const department = await departmentService.getById(Number(req.params.id));
@@ -141,6 +59,47 @@ router.get("/departments/:id", async (req, res, next) => {
             return res.status(404).json({ message: "Department not found" });
         }
         res.json(department);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Bulk import route
+router.post("/employees/bulk", upload.single("file"), async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const employees: Employee[] = [];
+        const filePath = req.file.path;
+
+        fs.createReadStream(filePath)
+            .pipe(csvParser())
+            .on("data", async (row) => {
+                const { name, position, departmentId, hireDate } = row;
+
+                const department = await departmentService.getById(Number(departmentId));
+                if (!department) {
+                    console.log(`Department ID ${departmentId} not found. Skipping record.`);
+                    return;
+                }
+
+                const employee = new Employee();
+                employee.name = name;
+                employee.position = position;
+                employee.department = department;
+                employee.hireDate = new Date(hireDate);
+                employees.push(employee);
+            })
+            .on("end", async () => {
+                await AppDataSource.getRepository(Employee).save(employees);
+                fs.unlinkSync(filePath);
+                res.json({ message: "Bulk import completed", count: employees.length });
+            })
+            .on("error", (error) => {
+                next(error);
+            });
     } catch (error) {
         next(error);
     }

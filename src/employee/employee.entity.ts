@@ -23,4 +23,4 @@ export class Employee {
 
   @CreateDateColumn()
   hireDate: Date;
-}
+
