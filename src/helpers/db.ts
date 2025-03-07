@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
-import { DataSource } from 'typeorm';
-import { User } from '../employee/employee.entity';
+import { DataSource, Repository } from 'typeorm';
+import { Employee } from '../employee/employee.entity';
+import { Department } from '../employee/department.entity';
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
     database: dbName,
-    entities: [User],
+    entities: [Employee, Department],
     synchronize: true,
     logging: true
 });
@@ -47,4 +48,12 @@ export const initializeDatabase = async () => {
         console.error('Database initialization error:', error);
         throw error;
     }
+};
+
+export const getEmployeeRepository = (): Repository<Employee> => {
+    return AppDataSource.getRepository(Employee);
+};
+
+export const getDepartmentRepository = (): Repository<Department> => {
+    return AppDataSource.getRepository(Department);
 };
