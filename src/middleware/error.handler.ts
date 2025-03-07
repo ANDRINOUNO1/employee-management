@@ -6,8 +6,4 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     res.status(statusCode).json({ message: err.message || err });
 };
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    const statusCode = typeof err === 'string' && err.toLowerCase().endsWith('not found') ? 404 : 500;
-    res.status(statusCode).json({ message: err.message || err });
-}
 
