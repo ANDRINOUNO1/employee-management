@@ -8,7 +8,8 @@ import { errorHandler } from './middleware/error.handler';
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use('/users', userRouter);
+app.use('/employee', employeeRouter);
+
 app.use(employeeRouter);
 app.use(errorHandler);
 
