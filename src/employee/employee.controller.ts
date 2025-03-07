@@ -6,6 +6,7 @@ import { Employee } from "./employee.entity";
 import { Department } from "./department.entity";
 import { Employees, Departments } from "./employee.service";
 import fs from "fs";
+import { Like } from "typeorm";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
@@ -141,6 +142,60 @@ router.get("/departments/:id", async (req, res, next) => {
             return res.status(404).json({ message: "Department not found" });
         }
         res.json(department);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Use Case 3: Update Salary
+router.put("/employees/:id/salary", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { salary } = req.body;
+        const employee = await employeeService.updateSalary(Number(req.params.id), salary);
+        res.json(employee);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+// Use Case 4: Soft Delete Employee
+router.delete("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await employeeService.softDelete(Number(req.params.id));
+        res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Use Case 5: Search Employees by Name
+router.get("/employees/search", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const name = req.query.name as string;
+        const employees = await employeeService.searchByName(name);
+        res.json(employees);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Use Case 7: Get Employee Tenure
+router.get("/employees/:id/tenure", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const tenure = await employeeService.calculateTenure(Number(req.params.id));
+        res.json(tenure);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Use Case 8: Transfer Employee
+router.put("/employees/:id/transfer", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { departmentId } = req.body;
+        const employee = await employeeService.transferDepartment(Number(req.params.id), departmentId);
+        res.json(employee);
     } catch (error) {
         next(error);
     }
