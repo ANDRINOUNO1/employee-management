@@ -3,7 +3,6 @@ import multer from "multer";
 import csvParser from "csv-parser";
 import { AppDataSource } from "../helpers/db";
 import { Employee } from "./employee.entity";
-import { Department } from "./department.entity";
 import { Employees, Departments } from "./employee.service";
 import fs from "fs";
 
