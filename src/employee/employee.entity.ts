@@ -24,3 +24,6 @@ export class Employee {
   @CreateDateColumn()
   hireDate: Date;
 
+  @Column({ nullable: true })
+  lastActivityDate: Date;
+}
