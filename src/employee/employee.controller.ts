@@ -6,7 +6,7 @@ import { Employee } from "./employee.entity";
 import { Department } from "./department.entity";
 import { Employees, Departments } from "./employee.service";
 import fs from "fs";
-import { Like } from "typeorm";
+
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
