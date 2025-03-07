@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Employee } from './employee.entity';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Employee } from "./employee.entity"; 
+import { DepartmentRoles } from "../helpers/department.role";
 
 @Entity()
 export class Department {
