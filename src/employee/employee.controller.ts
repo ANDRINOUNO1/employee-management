@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request , Response , NextFunction, RequestHandler } from "express"
 import multer from "multer";
 import csvParser from "csv-parser";
 import { AppDataSource } from "../helpers/db";
@@ -24,7 +24,7 @@ router.get("/employees", async (req: Request, res: Response, next: NextFunction)
 });
 
 // Get employee by ID
-router.get("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/employees/:id", (async (req: Request, res: Response, next: NextFunction) => {
     try {
         const employee = await employeeService.getById(Number(req.params.id));
         if (!employee) {
@@ -34,7 +34,7 @@ router.get("/employees/:id", async (req: Request, res: Response, next: NextFunct
     } catch (error) {
         next(error);
     }
-});
+}) as RequestHandler);
 
 // Create employee
 router.post("/employees", async (req: Request, res: Response, next: NextFunction) => {
@@ -67,7 +67,7 @@ router.delete("/employees/:id", async (req: Request, res: Response, next: NextFu
 });
 
 // Bulk import employees
-router.post("/employees/bulk", upload.single("file"), async (req, res, next) => {
+router.post("/employees/bulk", upload.single("file"), (async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "No file uploaded" });
@@ -122,10 +122,10 @@ router.post("/employees/bulk", upload.single("file"), async (req, res, next) => 
         }
         next(error);
     }
-});
+}) as RequestHandler);
 
 // Get all departments
-router.get("/departments", async (req, res, next) => {
+router.get("/departments", async (req : Request, res : Response, next : NextFunction) => {
     try {
         const departments = await departmentService.getAll();
         res.json(departments);
@@ -135,7 +135,7 @@ router.get("/departments", async (req, res, next) => {
 });
 
 // Get department by ID
-router.get("/departments/:id", async (req, res, next) => {
+router.get("/departments/:id", (async (req: Request, res: Response, next: NextFunction) => {
     try {
         const department = await departmentService.getById(Number(req.params.id));
         if (!department) {
@@ -145,7 +145,7 @@ router.get("/departments/:id", async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-});
+}) as RequestHandler);
 
 // Use Case 3: Update Salary
 router.put("/employees/:id/salary", async (req: Request, res: Response, next: NextFunction) => {
