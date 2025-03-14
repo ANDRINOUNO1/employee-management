@@ -1,7 +1,35 @@
 {
+  "name": "employee-management",
+  "version": "1.0.0",
+  "description": "employee management system",
+  "main": "src/server.ts",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:run": "npm run typeorm migration:run -- -d src/helpers/db.ts",
+    "migration:generate": "npm run typeorm migration:generate -- -d src/helpers/db.ts",
+    "lint": "eslint . --ext .ts",
+    "test": "jest",
+    "seed": "ts-node src/database/seeds/index.ts"
+  },
+  "dependencies": {
+    "@types/multer": "^1.4.12",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "express": "^4.21.2",
+    "express-async-handler": "^1.2.0",
+    "joi": "^17.13.3",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.13.0",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.21"
+  },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"

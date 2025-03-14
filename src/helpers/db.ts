@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
-import { DataSource } from 'typeorm';
-import { User } from '../employee/employee.entity';
+import { DataSource, Repository } from 'typeorm';
+import { Employee, Product } from '../employee/employee.entity';
+import { Department } from '../employee/department.entity';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ async function createDatabase() {
             host: process.env.DB_HOST || 'localhost',
             port: Number(process.env.DB_PORT || 3306),
             user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASS || '1234'
+            password: process.env.DB_PASS || '12345'
         });
 
         await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
@@ -31,9 +32,9 @@ export const AppDataSource = new DataSource({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 3306),
     username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
+    password: process.env.DB_PASS || '12345',
     database: dbName,
-    entities: [User],
+    entities: [Employee, Department, Product],
     synchronize: true,
     logging: true
 });
@@ -47,4 +48,12 @@ export const initializeDatabase = async () => {
         console.error('Database initialization error:', error);
         throw error;
     }
+};
+
+export const getEmployeeRepository = (): Repository<Employee> => {
+    return AppDataSource.getRepository(Employee);
+};
+
+export const getDepartmentRepository = (): Repository<Department> => {
+    return AppDataSource.getRepository(Department);
 };

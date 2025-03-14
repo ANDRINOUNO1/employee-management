@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Department } from './department.entity';
 
 @Entity()
-export class Employee {
+export class Employee { 
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -14,7 +15,7 @@ export class Employee {
   @Column({ nullable: true })
   salary: number;
 
-  @ManyToOne(() => Department)
+  @ManyToOne(() => Department, (department) => department.employees)
   department: Department;
 
   @Column({ default: true })
@@ -22,16 +23,33 @@ export class Employee {
 
   @CreateDateColumn()
   hireDate: Date;
+
+  @Column({ nullable: true })
+  lastActivityDate: Date;
 }
 
 @Entity()
-export class Department {
+export class Product { 
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   name: string;
+
+  @Column()
+  position: string;
   
-  @OneToMany(() => Employee, (employee) => employee.department)
-  employees: Employee[];
+  @Column()
+  tittle: string;
+
+  @Column()
+  branch: string;
+
+  @Column()
+  expireDate: string;
+  
+  @Column()
+  arrival: string;
+
 }
+
