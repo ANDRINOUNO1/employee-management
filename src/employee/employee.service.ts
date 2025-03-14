@@ -1,6 +1,7 @@
     import { Repository, Like } from 'typeorm';
     import { AppDataSource } from '../helpers/db';
     import { User } from './employee.entity';
+    import { Task } from './employee.entity';
     import { Employee } from './employee.entity';
     import { Department } from './department.entity';
     import { DepartmentRoles } from '../helpers/department.role';
@@ -39,6 +40,37 @@
             if (!customer) throw new Error('User not found');
     
             return this.userRepository.remove(customer);
+        }
+    }
+    export class Tasks {
+        private taskRepository: Repository<Task> = AppDataSource.getRepository(Task);
+    
+        async getAll() {
+            return this.taskRepository.find();
+        }
+    
+        async getById(id: number) {
+            return this.taskRepository.findOneBy({ id });
+        }
+    
+        async create(data: Partial<User>) {
+            const tasked = this.taskRepository.create(data);
+            return this.taskRepository.save(tasked);
+        }
+    
+        async update(id: number, data: Partial<User>) {
+            const tasked = await this.getById(id);
+            if (!tasked) throw new Error('User not found');
+    
+            Object.assign(tasked, data);
+            return this.taskRepository.save(tasked);
+        }
+    
+        async delete(id: number) {
+            const tasked = await this.getById(id);
+            if (!tasked) throw new Error('User not found');
+    
+            return this.taskRepository.remove(tasked);
         }
     }
 

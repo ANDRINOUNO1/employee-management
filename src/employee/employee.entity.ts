@@ -45,3 +45,15 @@ export class User {
     @Column()
     lastName!: string;
 }
+
+@Entity()
+export class Task {
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @Column()
+    Task!: string;
+
+    @Column()
+    Date!: string;
+}

@@ -4,7 +4,7 @@ import csvParser from "csv-parser";
 import { AppDataSource } from "../helpers/db";
 import { Employee } from "./employee.entity";
 import { Department } from "./department.entity";
-import { Employees, Departments, CustomerService } from "./employee.service";
+import { Employees, Departments, CustomerService, Tasks } from "./employee.service";
 import fs from "fs";
 
 const router = express.Router();
@@ -12,6 +12,51 @@ const upload = multer({ dest: "uploads/" });
 const employeeService = new Employees();
 const departmentService = new Departments();
 const userService = new CustomerService();
+const taskService = new Tasks();
+
+router.post("/tasks", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await taskService.create(req.body);
+        res.status(201).json(user);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/tasks", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await taskService.getAll();
+        res.json(user);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/tasks/:id", (async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const employee = await taskService.getById(Number(req.params.id));
+        if (!employee) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(employee);
+    } catch (error) {
+        next(error);
+    }
+}) as RequestHandler);
+
+router.put("/tasks/:id", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await taskService.update(Number(req.params.id), req.body);
+        res.json(user);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.delete('/tasks/:id', async (req, res, next) => {
+    try { res.json(await taskService.delete(Number(req.params.id))); }
+    catch (err) { next(err); }
+});
 
 router.post("/users", async (req: Request, res: Response, next: NextFunction) => {
     try {
