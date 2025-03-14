@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Department } from './department.entity';
 
-@Entity('employee')
+@Entity()
 export class Employee {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,4 +23,25 @@ export class Employee {
 
   @CreateDateColumn()
   hireDate: Date;
+
+  @Column({ nullable: true })
+  lastActivityDate: Date;
+}
+
+@Entity('users')
+export class User {
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @Column({ unique: true })
+    email!: string;
+
+    @Column({ nullable: true })
+    title?: string;
+
+    @Column()
+    firstName!: string;
+
+    @Column()
+    lastName!: string;
 }

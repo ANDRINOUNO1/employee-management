@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.9",
@@ -11,7 +12,30 @@
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "express": "^4.21.2",
+    "joi": "^17.13.3",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.13.0",
     "typeorm": "^0.3.21"
-  }
+  },
+  "name": "employee-management",
+  "version": "1.0.0",
+  "description": "installation guide \r npm install \r npm install express multer csv-parser typeorm\r npm install --save-dev typescript ts-node nodemon @types/node @types/express\r npm install --save-dev @type/cors",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ANDRINOUNO1/employee-management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ANDRINOUNO1/employee-management/issues"
+  },
+  "homepage": "https://github.com/ANDRINOUNO1/employee-management#readme"
 }

@@ -1,9 +1,10 @@
-import 'reflect-metadata';
+    import 'reflect-metadata';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import { DataSource, Repository } from 'typeorm';
 import { Employee } from '../employee/employee.entity';
 import { Department } from '../employee/department.entity';
+import { User } from '../employee/employee.entity';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ async function createDatabase() {
             host: process.env.DB_HOST || 'localhost',
             port: Number(process.env.DB_PORT || 3306),
             user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASS || '1234'
+            password: process.env.DB_PASS || 'Administrator'
         });
 
         await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);
@@ -32,9 +33,9 @@ export const AppDataSource = new DataSource({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 3306),
     username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
+    password: process.env.DB_PASS || 'Administrator',
     database: dbName,
-    entities: [Employee, Department],
+    entities: [Employee, Department, User],
     synchronize: true,
     logging: true
 });
