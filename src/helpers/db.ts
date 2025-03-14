@@ -4,10 +4,11 @@ import mysql from 'mysql2/promise';
 import { DataSource, Repository } from 'typeorm';
 import { Employee } from '../employee/employee.entity';
 import { Department } from '../employee/department.entity';
+import { User } from '../employee/user.entity';
 
 dotenv.config();
 
-const dbName = process.env.DB_NAME || 'employee_management';
+const dbName = process.env.DB_NAME || 'newemployee_management';
 
 async function createDatabase() {
     try {
@@ -34,7 +35,7 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '1234',
     database: dbName,
-    entities: [Employee, Department],
+    entities: [Employee, Department, User],
     synchronize: true,
     logging: true
 });

@@ -10,6 +10,7 @@ export class Employees {
 
     async getAll() {
         return this.employeeRepository.find({
+            where: { isActive: true },
             relations: ['department']
         });
     }  
@@ -20,8 +21,7 @@ export class Employees {
         });
     }
  
-    async create(data: any) {  // Change type to any temporarily to handle departmentId
-        // Check if position is already taken
+    async create(data: any) {  
         if (await this.employeeRepository.findOneBy({ position: data.position })) {
             throw new Error(`Position ${data.position} is already registered`);
         }
@@ -99,13 +99,24 @@ export class Employees {
     }
 
     // Use Case 4: Soft Delete
-    async softDelete(id: number) {
-        const employee = await this.getById(id);
-        if (!employee) throw new Error('Employee not found');
+    async softDelete(id: number): Promise<void> {
+        const employee = await this.employeeRepository.findOne({
+            where: { id },
+            relations: ['department']
+        });
 
+        if (!employee) {
+            throw new Error('Employee not found');
+        }
+
+        // Update employee properties
         employee.isActive = false;
         employee.lastActivityDate = new Date();
-        return this.employeeRepository.save(employee);
+
+        // Save the changes to database
+        await this.employeeRepository.save(employee);
+
+       
     }
 
     // Use Case 5: Search by Name
@@ -153,6 +164,72 @@ export class Employees {
         employee.department = department;
         employee.lastActivityDate = new Date();
         return this.employeeRepository.save(employee);
+    }
+
+    // Admin: Get all employees
+    async getAllForAdmin() {
+        return this.employeeRepository.find({
+            relations: ['department']
+        });
+    }
+
+    // User: Get only their own data
+    async getForUser(userId: number) {
+        return this.employeeRepository.findOne({
+            where: { id: userId },
+            relations: ['department']
+        });
+    }
+
+    // Admin: Search all employees
+    async searchByNameForAdmin(name: string) {
+        return this.employeeRepository.find({
+            where: {
+                name: Like(`%${name}%`),
+                isActive: true
+            },
+            relations: ['department']
+        });
+    }
+
+    // User: Search only in their department
+    async searchByNameForUser(name: string, userId: number) {
+        const userEmployee = await this.getById(userId);
+        if (!userEmployee) throw new Error('Employee not found');
+
+        return this.employeeRepository.find({
+            where: {
+                name: Like(`%${name}%`),
+                isActive: true,
+                department: { id: userEmployee.department.id }
+            },
+            relations: ['department']
+        });
+    }
+
+    // Admin: Get all department employees
+    async getDepartmentEmployeesForAdmin(departmentId: number) {
+        return this.employeeRepository.find({
+            where: {
+                department: { id: departmentId },
+                isActive: true
+            },
+            relations: ['department']
+        });
+    }
+
+    // User: Get only their department colleagues
+    async getDepartmentEmployeesForUser(userId: number) {
+        const userEmployee = await this.getById(userId);
+        if (!userEmployee) throw new Error('Employee not found');
+
+        return this.employeeRepository.find({
+            where: {
+                department: { id: userEmployee.department.id },
+                isActive: true
+            },
+            relations: ['department']
+        });
     }
 }
 export class Departments {

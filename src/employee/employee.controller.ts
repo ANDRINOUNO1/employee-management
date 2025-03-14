@@ -7,22 +7,30 @@ import { Department } from "./department.entity";
 import { Employees, Departments } from "./employee.service";
 import fs from "fs";
 import { DepartmentRoles } from '../helpers/department.role';
+import { AuthRequest } from '../middleware/auth.middleware';
+import { Role } from '../helpers/role';
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 const employeeService = new Employees();
 const departmentService = new Departments();
 
-// Employee Routes
 // 1. Search route must come before other GET routes to avoid conflict
-router.get("/employees/search", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/employees/search", authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const name = req.query.name as string;
+        const { name } = req.body;
         if (!name) {
             return res.status(400).json({ message: "Name parameter is required" });
         }
-        const employees = await employeeService.searchByName(name);
-        res.json(employees);
+
+        if (req.user?.role === Role.Admin) {
+            const employees = await employeeService.searchByNameForAdmin(name);
+            res.json(employees);
+        } else {
+            const employees = await employeeService.searchByNameForUser(name, req.user?.id!);
+            res.json(employees);
+        }
     } catch (error) {
         next(error);
     }
@@ -31,9 +39,7 @@ router.get("/employees/search", async (req: Request, res: Response, next: NextFu
 // 2. Get all employees with optional pagination
 router.get("/employees", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
-        const employees = await employeeService.getAll();
+        const employees = await employeeService.getAllForAdmin();
         res.json(employees);
     } catch (error) {
         next(error);
@@ -98,7 +104,7 @@ router.post("/employees/bulk", async (req: Request, res: Response, next: NextFun
 
         for (const data of employeesData) {
             // Validate required fields
-            if (!data.name || !data.departmentId) {
+            if (!data.name || !data.departmentId) { 
                 console.log('Skipping record: Missing required fields');
                 continue;
             }
@@ -147,7 +153,7 @@ router.post("/employees/bulk", async (req: Request, res: Response, next: NextFun
 });
 
 // 7. Update employee salary
-router.put("/employees/:id/salary", async (req: Request, res: Response, next: NextFunction) => {
+router.put("/employees/:id/salary", authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const { salary } = req.body;
         if (typeof salary !== 'number' || salary < 0) {
@@ -161,7 +167,7 @@ router.put("/employees/:id/salary", async (req: Request, res: Response, next: Ne
 });
 
 // 8. Transfer employee to another department
-router.put("/employees/:id/transfer", async (req: Request, res: Response, next: NextFunction) => {
+router.put("/employees/:id/transfer", authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const { departmentId } = req.body;
         if (!departmentId) {
@@ -185,11 +191,28 @@ router.put("/employees/:id", async (req: Request, res: Response, next: NextFunct
 });
 
 // 10. Soft delete employee
-router.delete("/employees/:id", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/employees/:id", authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        await employeeService.softDelete(Number(req.params.id));
-        res.status(204).send();
+        if (req.user?.role !== Role.Admin) {
+            return res.status(403).json({ message: "Only admin can delete employees" });
+        }
+
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ message: "Invalid ID" });
+        }
+
+        await employeeService.softDelete(id);
+        
+        // Send success response
+        res.status(200).json({ 
+            message: "Employee successfully deactivated",
+            employeeId: id
+        });
     } catch (error) {
+        if (error instanceof Error && error.message === 'Employee not found') {
+            return res.status(404).json({ message: "Employee not found" });
+        }
         next(error);
     }
 });
@@ -211,6 +234,20 @@ router.get("/departments/:id", async (req: Request, res: Response, next: NextFun
             return res.status(404).json({ message: "Department not found" });
         }
         res.json(department);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/departments/:id/employees", authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {   
+    try {
+        if (req.user?.role === Role.Admin) {
+            const employees = await employeeService.getDepartmentEmployeesForAdmin(Number(req.params.id));
+            res.json(employees);
+        } else {
+            const employees = await employeeService.getDepartmentEmployeesForUser(req.user?.id!);
+            res.json(employees);
+        }
     } catch (error) {
         next(error);
     }

@@ -10,3 +10,5 @@ then npm install typeorm reflect-metadata
 
 npm insall mysql2
 
+need to create employee first  before creating user for the employeee 
+employeeid required for the creating in the user 
