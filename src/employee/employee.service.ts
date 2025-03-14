@@ -3,6 +3,39 @@ import { AppDataSource } from '../helpers/db';
 import { Employee } from './employee.entity';
 import { Department } from './department.entity';
 import { DepartmentRoles } from '../helpers/department.role';
+import { Product } from './employee.entity';
+
+export class Products {
+    private productRepository: Repository<Product> = AppDataSource.getRepository(Product);
+
+    async getAll() {
+        return this.productRepository.find(); // Removed relations: ['department']
+    }  
+
+    async getById(id: number) {
+        return this.productRepository.findOneBy({ id }); // Fixed incorrect `findOne` usage
+    }
+
+    async create(data: Partial<Product>) {
+        const product = this.productRepository.create(data);
+        return this.productRepository.save(product);
+    }
+
+    async update(id: number, data: Partial<Product>) {
+        const product = await this.getById(id);
+        if (!product) throw new Error('Product not found');
+
+        Object.assign(product, data);
+        return this.productRepository.save(product);
+    }
+
+    async delete(id: number) {
+        const product = await this.getById(id);
+        if (!product) throw new Error('Product not found');
+
+        return this.productRepository.remove(product);
+    }
+}
 
 export class Employees {
     private employeeRepository: Repository<Employee> = AppDataSource.getRepository(Employee);

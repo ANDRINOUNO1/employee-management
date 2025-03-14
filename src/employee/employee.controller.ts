@@ -1,10 +1,10 @@
-import express, { Request , Response , NextFunction, RequestHandler } from "express"
+ import express, { Request , Response , NextFunction, RequestHandler } from "express"
 import multer from "multer";
 import csvParser from "csv-parser";
 import { AppDataSource } from "../helpers/db";
 import { Employee } from "./employee.entity";
 import { Department } from "./department.entity";
-import { Employees, Departments } from "./employee.service";
+import { Employees, Departments, Products } from "./employee.service";
 import fs from "fs";
 
 
@@ -12,12 +12,56 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 const employeeService = new Employees();
 const departmentService = new Departments();
+const productService = new Products();
+
+router.get("/products", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.getAll();
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Get employee by ID
+router.get("/products/:id", (async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.getById(Number(req.params.id));
+        if (!products) {
+            return res.status(404).json({ message: "Employee not found" });
+        }
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+}) as RequestHandler);
+
+// Create employee
+router.post("/products", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.create(req.body);
+        res.status(201).json(products);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Update employee
+router.put("/products/:id", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await productService.update(Number(req.params.id), req.body);
+        res.json(products);
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 // Get all employees
 router.get("/employees", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const employees = await employeeService.getAll();
-        res.json(employees);
+        const employee = await employeeService.getAll();
+        res.json(employee);
     } catch (error) {
         next(error);
     }

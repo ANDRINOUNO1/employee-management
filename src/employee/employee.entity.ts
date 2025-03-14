@@ -27,3 +27,29 @@ export class Employee {
   @Column({ nullable: true })
   lastActivityDate: Date;
 }
+
+@Entity()
+export class Product { 
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  position: string;
+  
+  @Column()
+  tittle: string;
+
+  @Column()
+  branch: string;
+
+  @Column()
+  expireDate: string;
+  
+  @Column()
+  arrival: string;
+
+}
+

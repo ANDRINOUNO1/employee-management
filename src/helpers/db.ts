@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import { DataSource, Repository } from 'typeorm';
-import { Employee } from '../employee/employee.entity';
+import { Employee, Product } from '../employee/employee.entity';
 import { Department } from '../employee/department.entity';
 
 dotenv.config();
@@ -34,7 +34,7 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '12345',
     database: dbName,
-    entities: [Employee, Department],
+    entities: [Employee, Department, Product],
     synchronize: true,
     logging: true
 });
